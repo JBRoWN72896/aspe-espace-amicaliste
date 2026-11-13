@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>ASPE | Espace amicaliste</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background: #f4f4f4; color: #1d1d1d;
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .carte {
+      background: #fff; width: 100%; max-width: 420px;
+      border-radius: 14px; overflow: hidden;
+      box-shadow: 0 6px 24px rgba(0,0,0,.08);
+    }
+    .bandeau { background: #c8102e; color: #fff; padding: 22px 24px; }
+    .bandeau h1 { margin: 0; font-size: 20px; }
+    .bandeau p { margin: 6px 0 0; font-size: 14px; opacity: .9; }
+    form { padding: 22px 24px 8px; }
+    label { display: block; font-size: 14px; font-weight: 600; margin: 14px 0 6px; }
+    input[type=text], input[type=email], input[type=date] {
+      width: 100%; padding: 12px; font-size: 16px;
+      border: 1px solid #ccc; border-radius: 8px;
+    }
+    input:focus { outline: 2px solid #c8102e; border-color: transparent; }
+    button {
+      width: 100%; margin-top: 20px; padding: 14px;
+      font-size: 16px; font-weight: 700; color: #fff;
+      background: #c8102e; border: 0; border-radius: 8px; cursor: pointer;
+    }
+    button:disabled { opacity: .6; cursor: wait; }
+    .msg { margin: 16px 24px 0; padding: 14px; border-radius: 8px; display: none; font-size: 15px; }
+    .msg.ok { display: block; background: #e8f5ec; border: 1px solid #9ad1ab; }
+    .msg.ko { display: block; background: #fdecec; border: 1px solid #f1a9a9; }
+    .msg.info { display: block; background: #eef3fb; border: 1px solid #b6c8e6; }
+    .numero {
+      display: block; margin-top: 8px; font-size: 26px; font-weight: 800;
+      letter-spacing: 2px; font-family: "Courier New", monospace; user-select: all;
+    }
+    .secondaire { margin-top: 10px; padding: 8px; font-size: 14px; background: #1d1d1d; }
+    #blocEmail { display: none; margin: 16px 24px 0; padding: 16px; border: 1px dashed #c8102e; border-radius: 10px; }
+    #blocEmail h2 { margin: 0 0 4px; font-size: 16px; }
+    #blocEmail p { margin: 0; font-size: 14px; color: #444; }
+    .accord { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; font-size: 13px; font-weight: 400; }
+    .accord input { margin-top: 3px; }
+    .pied { padding: 18px 24px 22px; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="carte">
+    <div class="bandeau">
+      <h1>Espace amicaliste</h1>
+      <p>Amicale des Sapeurs-Pompiers d'Évreux</p>
+    </div>
+
+    <form id="formulaire" autocomplete="off">
+      <label for="nom">Nom</label>
+      <input id="nom" type="text" required>
+
+      <label for="prenom">Prénom</label>
+      <input id="prenom" type="text" required>
+
+      <label for="naissance">Date de naissance</label>
+      <input id="naissance" type="date" required>
+
+      <button id="bouton" type="submit">Valider</button>
+    </form>
+
+    <div id="resultat" class="msg"></div>
+
+    <div id="blocEmail">
+      <h2>Restons en contact</h2>
+      <p id="texteEmail">Laissez votre email pour recevoir les informations et invitations de l'amicale.</p>
+      <form id="formEmail">
+        <label for="email">Votre adresse email</label>
+        <input id="email" type="email" required>
+        <label class="accord">
+          <input id="accord" type="checkbox" required>
+          J'accepte que l'ASPE utilise cette adresse uniquement pour m'envoyer ses informations et
+          invitations. Elle ne sera jamais transmise à des tiers. Je peux demander sa suppression à tout moment.
+        </label>
+        <button id="boutonEmail" type="submit">Enregistrer mon email</button>
+      </form>
+      <div id="resultatEmail" class="msg" style="margin:12px 0 0"></div>
+    </div>
+
+    <div class="pied">
+      Vos informations servent uniquement à vous identifier. Chaque demande est enregistrée par l'amicale.
+    </div>
+  </div>
+
+  <script>
+    // ====== RÉGLAGE : coller ici l'URL /exec de l'application Web Apps Script ======
+    const API_URL = 'COLLER_ICI_URL_APPS_SCRIPT';
+    // ===============================================================================
+
+    var identite = null;
+    const $ = function (id) { return document.getElementById(id); };
+
+    function appelApi(params) {
+      if (API_URL.indexOf('https://script.google.com/') !== 0) {
+        return Promise.resolve({ ok: false, message: 'Service non configuré. Contactez le bureau de l\'amicale.' });
+      }
+      return fetch(API_URL + '?' + new URLSearchParams(params).toString())
+        .then(function (r) { return r.json(); })
+        .catch(function () { return { ok: false, message: 'Erreur de connexion. Réessayez dans un instant.' }; });
+    }
+
+    $('formulaire').addEventListener('submit', function (e) {
+      e.preventDefault();
+      identite = { nom: $('nom').value, prenom: $('prenom').value, date: $('naissance').value };
+      $('bouton').disabled = true; $('bouton').textContent = 'Recherche en cours...';
+      $('resultat').className = 'msg'; $('resultat').innerHTML = '';
+      $('blocEmail').style.display = 'none';
+      appelApi({ action: 'rechercher', nom: identite.nom, prenom: identite.prenom, date: identite.date }).then(afficher);
+    });
+
+    function afficher(rep) {
+      $('bouton').disabled = false; $('bouton').textContent = 'Valider';
+      const zone = $('resultat');
+      zone.className = 'msg ' + (rep.ok ? 'ok' : (rep.identifie ? 'info' : 'ko'));
+      zone.textContent = rep.message;
+
+      if (rep.ok) {
+        const n = document.createElement('span');
+        n.className = 'numero'; n.textContent = rep.numero;
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'secondaire'; b.textContent = 'Copier le numéro';
+        b.onclick = function () { navigator.clipboard.writeText(rep.numero).then(function () { b.textContent = 'Numéro copié'; }); };
+        zone.appendChild(n); zone.appendChild(b);
+      }
+
+      if (rep.identifie) {
+        $('texteEmail').textContent = rep.emailMasque
+          ? 'Email enregistré : ' + rep.emailMasque + '. Vous pouvez le confirmer ou en proposer un nouveau.'
+          : 'Laissez votre email pour recevoir les informations et invitations de l\'amicale.';
+        $('resultatEmail').className = 'msg';
+        $('formEmail').style.display = 'block';
+        $('blocEmail').style.display = 'block';
+      }
+    }
+
+    $('formEmail').addEventListener('submit', function (e) {
+      e.preventDefault();
+      $('boutonEmail').disabled = true;
+      appelApi({
+        action: 'email', nom: identite.nom, prenom: identite.prenom, date: identite.date,
+        email: $('email').value, accord: $('accord').checked ? '1' : '0'
+      }).then(function (rep) {
+        $('boutonEmail').disabled = false;
+        $('resultatEmail').className = 'msg ' + (rep.ok ? 'ok' : 'ko');
+        $('resultatEmail').textContent = rep.message;
+        if (rep.ok) $('formEmail').style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+# Ne jamais publier les données des adhérents
+*.xlsx
+*.xls
+*.csv
+*.pdf
