@@ -240,10 +240,10 @@ function dateEnIso(valeur) {
 
 /** Trace chaque demande dans l'onglet Journal */
 function journaliser(nom, prenom, date, resultat, detail) {
-  const classeur = classeur();
-  var journal = classeur.getSheetByName(CONFIG.ONGLET_JOURNAL);
+  const ss = classeur();
+  var journal = ss.getSheetByName(CONFIG.ONGLET_JOURNAL);
   if (!journal) {
-    journal = classeur.insertSheet(CONFIG.ONGLET_JOURNAL);
+    journal = ss.insertSheet(CONFIG.ONGLET_JOURNAL);
     journal.appendRow(['Horodatage', 'Nom saisi', 'Prénom saisi', 'Date saisie', 'Résultat', 'Détail']);
     journal.setFrozenRows(1);
   }

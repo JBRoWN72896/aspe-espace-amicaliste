@@ -23,8 +23,8 @@ Amicaliste ──► Page publique (GitHub Pages, index.html)
 
 ### 1. Base et script (Google)
 
-1. Importer la base Excel dans Google Drive, l'ouvrir avec Google Sheets puis *Fichier > Enregistrer au format Google Sheets*. L'onglet doit s'appeler `Adherents`.
-2. Dans le Sheet : *Extensions > Apps Script*. Remplacer le contenu de `Code.gs` par celui de [`apps-script/Code.gs`](apps-script/Code.gs). Adapter la ligne `CONTACT` si besoin. Enregistrer.
+1. Base : Google Sheet « ASPE - Base amicalistes 2026 » (compte terangamj@gmail.com), onglet `Adherents`.
+2. Script : projet Apps Script autonome « ASPE Espace amicaliste » (même compte), contenu de [`apps-script/Code.gs`](apps-script/Code.gs). Il pointe vers le Sheet via `ID_CLASSEUR`. Adapter la ligne `CONTACT` si besoin.
 3. *Déployer > Nouveau déploiement > Application Web* :
    - Exécuter en tant que : **Moi**
    - Qui a accès : **Tout le monde**
@@ -33,13 +33,14 @@ Amicaliste ──► Page publique (GitHub Pages, index.html)
 
 ### 2. Page (GitHub)
 
-1. Dans `index.html`, remplacer `COLLER_ICI_URL_APPS_SCRIPT` par l'URL `/exec`.
+1. Dans `index.html`, la constante `API_URL` contient l'URL `/exec` du script (déjà renseignée).
 2. *Settings > Pages* : Source **Deploy from a branch**, branche `main`, dossier `/ (root)`.
 3. Le lien à partager : `https://jbrown72896.github.io/aspe-espace-amicaliste/`
 
 ## Mises à jour
 
 - Ajouter ou corriger un adhérent : directement dans le Google Sheet, rien à republier.
+- Accès au script : script.google.com (compte terangamj@gmail.com) > « ASPE Espace amicaliste ».
 - Modifier le script : *Déployer > Gérer les déploiements > Modifier > Nouvelle version* (l'URL reste la même).
 - Suivi des demandes : onglet `Journal` du Sheet (créé automatiquement).
 
