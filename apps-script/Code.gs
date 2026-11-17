@@ -2,7 +2,7 @@
  * ASPE - Libre-service amicalistes :
  *   1) récupération du numéro d'adhérent FNSPF
  *   2) collecte / mise à jour de l'adresse email
- * Script à coller dans : Google Sheets > Extensions > Apps Script
+ * Projet Apps Script autonome relié au Google Sheet défini par ID_CLASSEUR.
  * La page publique (index.html) est hébergée sur GitHub Pages et interroge ce script.
  *
  * Onglet requis : "Adherents" avec en ligne 1 au minimum les en-têtes :
@@ -12,6 +12,9 @@
  */
 
 // ===================== RÉGLAGES =====================
+const ID_CLASSEUR = '17q2L17MeRga3kjl3Q1_8HYu4fKC8tsEM5sRuErN3m5g'; // Google Sheet de la base
+function classeur() { return SpreadsheetApp.openById(ID_CLASSEUR); }
+
 const CONFIG = {
   ONGLET_BASE: 'Adherents',
   ONGLET_JOURNAL: 'Journal',
@@ -154,7 +157,7 @@ function enregistrerEmail(nom, prenom, dateNaissance, email, consentement) {
 // ---------- Recherche ----------
 
 function trouverAdherent(saisie) {
-  const feuille = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.ONGLET_BASE);
+  const feuille = classeur().getSheetByName(CONFIG.ONGLET_BASE);
   if (!feuille) throw new Error('Onglet "' + CONFIG.ONGLET_BASE + '" introuvable.');
 
   const col = colonnes(feuille);
@@ -237,7 +240,7 @@ function dateEnIso(valeur) {
 
 /** Trace chaque demande dans l'onglet Journal */
 function journaliser(nom, prenom, date, resultat, detail) {
-  const classeur = SpreadsheetApp.getActiveSpreadsheet();
+  const classeur = classeur();
   var journal = classeur.getSheetByName(CONFIG.ONGLET_JOURNAL);
   if (!journal) {
     journal = classeur.insertSheet(CONFIG.ONGLET_JOURNAL);
@@ -246,3 +249,4 @@ function journaliser(nom, prenom, date, resultat, detail) {
   }
   journal.appendRow([new Date(), nom, prenom, date, resultat, detail || '']);
 }
+
